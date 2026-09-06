@@ -32,7 +32,7 @@ Stop the server with Ctrl+C. No virtual environment activation is needed.
 - `.python-version`: Python version used by uv.
 
 Django is constrained to the 5.2 LTS series. SQLite keeps local setup self-contained;
-`migrate` initializes Django's built-in tables in the ignored `db.sqlite3` file.
+`migrate` initializes Django's built-in and product tables in the ignored `db.sqlite3` file.
 The generated settings are for local development, with `DEBUG=True` and a
 development-only secret key. Language and time zone retain Django's defaults.
 
@@ -104,3 +104,22 @@ for email authentication, administrator provisioning, household isolation,
 invitation delivery/signup, single-use acceptance, active membership constraints,
 CSRF protection, and preservation of legacy accounts. Tests create their own data
 in a separate temporary database and do not require manually provisioned users.
+
+To run just the bootstrap smoke test from issue #1:
+
+```sh
+uv run python manage.py test chores.tests.ProjectSmokeTests
+```
+
+### Issue #1 verification (2026-09-06)
+
+The existing scaffold already supplies the bootstrap requirements; later product
+features and migrations are retained. Verified with Python 3.14.4 and Django 5.2.17:
+
+- `uv sync --locked` completed successfully.
+- `uv run python manage.py migrate` completed with no pending migrations.
+- `uv run python manage.py check` reported no issues.
+- `uv run python manage.py makemigrations --check --dry-run` detected no changes.
+- `uv run python manage.py test` passed all 26 tests, including the admin login smoke test.
+- `uv run python manage.py runserver 127.0.0.1:8011 --noreload` served
+  `/admin/login/` with HTTP 200; the server was stopped after verification.
