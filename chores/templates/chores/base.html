@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Household chores{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'chores/bootstrap.min.css' %}">
+</head>
+<body class="bg-light">
+  <nav class="navbar bg-white border-bottom" aria-label="Main navigation">
+    <div class="container gap-3">
+      <a class="navbar-brand" href="{% url 'home' %}">Household chores</a>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}<button class="btn btn-outline-secondary" type="submit">Sign out</button>
+      </form>
+      {% else %}<a class="btn btn-outline-primary" href="{% url 'login' %}">Sign in</a>{% endif %}
+    </div>
+  </nav>
+  <main class="container py-5">
+    <div class="row justify-content-center"><div class="col-12 col-md-8 col-lg-6">
+      {% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}
+      <div class="card shadow-sm"><div class="card-body p-4">
+        {% block content %}{% endblock %}
+      </div></div>
+    </div></div>
+  </main>
+</body>
+</html>

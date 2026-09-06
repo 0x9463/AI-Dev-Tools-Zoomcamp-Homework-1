@@ -1,0 +1,11 @@
+{% extends "chores/base.html" %}
+{% block title %}{{ household.name }} · Household chores{% endblock %}
+{% block content %}
+<h1 class="h3">{{ household.name }}</h1>
+{% if household.admin_id == user.pk %}
+<p>You are the administrator of this household.</p>
+<a class="btn btn-primary" href="{% url 'create_invitation' household.pk %}">Invite a member</a>
+{% else %}
+<p>You are a member of this household.</p>
+{% endif %}
+{% endblock %}

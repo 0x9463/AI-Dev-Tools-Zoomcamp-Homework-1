@@ -1,3 +1,103 @@
-from django.shortcuts import render
+from smtplib import SMTPException
+from urllib.parse import urlencode
 
-# Create your views here.
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import IntegrityError
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods
+
+from .forms import HouseholdForm, InvitationForm, SignupForm
+from .models import Account, Household, Invitation
+from .services import accept_invitation, create_household, is_administrator, send_invitation
+
+
+@login_required
+def home(request):
+    household = Household.objects.filter(
+        Q(admin=request.user) | Q(memberships__user=request.user, memberships__active=True)
+    ).first()
+    if household:
+        return redirect("household_home", pk=household.pk)
+    return render(request, "chores/home.html", {"can_create": is_administrator(request.user)})
+
+
+@login_required
+def household_home(request, pk):
+    household = get_object_or_404(
+        Household.objects.filter(Q(admin=request.user) | Q(memberships__user=request.user, memberships__active=True)).distinct(),
+        pk=pk,
+    )
+    return render(request, "chores/household.html", {"household": household})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def household_create(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied
+    form = HouseholdForm(request.POST if request.method == "POST" else None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            household = create_household(user=request.user, name=form.cleaned_data["name"])
+        except ValidationError as error:
+            form.add_error(None, error)
+        except IntegrityError:
+            form.add_error(None, "You already have a household.")
+        else:
+            return redirect("household_home", pk=household.pk)
+    return render(request, "chores/form.html", {"form": form, "title": "Create your household", "button": "Create household"})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def invitation_create(request, pk):
+    household = get_object_or_404(Household, pk=pk, admin=request.user)
+    if not is_administrator(request.user):
+        raise PermissionDenied
+    form = InvitationForm(request.POST if request.method == "POST" else None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            send_invitation(household=household, user=request.user, email=form.cleaned_data["email"])
+        except (SMTPException, OSError):
+            form.add_error(None, "The invitation could not be sent. Please try again.")
+        else:
+            messages.success(request, "Invitation sent.")
+            return redirect("household_home", pk=household.pk)
+    return render(request, "chores/form.html", {"form": form, "title": f"Invite a member to {household.name}", "button": "Send invitation"})
+
+
+@require_http_methods(["GET", "POST"])
+def invitation_accept(request, token):
+    invitation = get_object_or_404(Invitation.objects.select_related("household"), token=token, accepted_at__isnull=True)
+    login_url = reverse("login") + "?" + urlencode({"next": request.path})
+    existing = Account.objects.filter(email__iexact=invitation.email).exists()
+    needs_login = not request.user.is_authenticated and existing
+    form = None if request.user.is_authenticated or needs_login else SignupForm(
+        request.POST if request.method == "POST" else None, email=invitation.email
+    )
+    error = None
+    if request.method == "POST" and not needs_login and (form is None or form.is_valid()):
+        try:
+            user, household = accept_invitation(
+                token=token,
+                user=request.user if request.user.is_authenticated else None,
+                name=form.cleaned_data["name"] if form else "",
+                password=form.cleaned_data["password1"] if form else None,
+            )
+        except ValidationError as exc:
+            error = " ".join(exc.messages)
+        except IntegrityError:
+            error = "The invitation could not be accepted. Sign in if you already have an account."
+        else:
+            if not request.user.is_authenticated:
+                login(request, user, backend="chores.backends.EmailBackend")
+            return redirect("household_home", pk=household.pk)
+    return render(request, "chores/invitation.html", {
+        "invitation": invitation, "form": form, "needs_login": needs_login,
+        "login_url": login_url, "error": error,
+    })

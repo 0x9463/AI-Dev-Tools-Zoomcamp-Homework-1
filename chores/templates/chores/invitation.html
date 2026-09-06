@@ -1,0 +1,18 @@
+{% extends "chores/base.html" %}
+{% block title %}Join {{ invitation.household.name }} · Household chores{% endblock %}
+{% block content %}
+<h1 class="h3">Join {{ invitation.household.name }}</h1>
+<p>This invitation is for <strong>{{ invitation.email }}</strong>.</p>
+{% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
+{% if needs_login %}
+<p>You already have an account. Sign in with the invited email to accept.</p>
+<a class="btn btn-primary" href="{{ login_url }}">Sign in to accept</a>
+{% else %}
+{% if user.is_authenticated %}<p>You are signed in as {{ user.email }}. If this is not the invited account, sign out and sign in with the matching email.</p>{% endif %}
+<form method="post">
+  {% csrf_token %}
+  {% if form %}{% include "chores/fields.html" %}{% endif %}
+  <button class="btn btn-primary" type="submit">{% if form %}Create account and join{% else %}Accept invitation{% endif %}</button>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "chores/base.html" %}
+{% block content %}
+<h1 class="h3">Welcome, {{ user.first_name|default:"there" }}</h1>
+{% if can_create %}
+<p>Create your household to start inviting members.</p>
+<a class="btn btn-primary" href="{% url 'household_create' %}">Create household</a>
+{% else %}
+<p>You do not have an active household membership. Use an invitation from a household administrator to join.</p>
+{% endif %}
+{% endblock %}

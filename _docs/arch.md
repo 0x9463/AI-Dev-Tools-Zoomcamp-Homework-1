@@ -1,6 +1,6 @@
 # Household chores MVP architecture
 
-Status: selected architecture for implementation; only the Django scaffold currently exists.
+Status: bootstrap and backlog items #2–5 are implemented: email authentication, household creation, invitations, and member signup. Remaining product capabilities below describe the planned architecture.
 
 The [product specification](plan.md) defines behavior, scope, and priorities: P0, then P1, then P2. This document records the selected Option 1 architecture and does not add product requirements or prescribe a task sequence. The [backlog](backlog.md) indexes implementation work tracked in GitHub Issues.
 
@@ -18,7 +18,7 @@ The [product specification](plan.md) defines behavior, scope, and priorities: P0
 | Evidence photos | Django file handling and local media storage initially | Support one optional image per completion submission in P2. |
 | Tests | Django test runner and test client | Verify business rules, permissions, forms, and database effects. |
 
-Bootstrap, product authentication flows, scheduled commands, and photo handling are planned, not implemented. No React, separate REST API, HTMX, Node build pipeline, Redis, or Celery is required for this architecture.
+Bootstrap styling and product email login/signup are implemented. Password recovery, scheduled commands, and photo handling remain planned. No React, separate REST API, HTMX, Node build pipeline, Redis, or Celery is required for this architecture.
 
 ## Application structure
 
@@ -52,7 +52,11 @@ Ordinary full-page navigation is sufficient for the MVP, including calendar day/
 
 ## Identity and access
 
-Use Django authentication facilities for password hashing, sessions, login/logout, and password recovery. Finalize the user model and email login strategy before product migrations. The existing scaffold currently uses Django's default user model; changing that later requires an explicit migration approach that preserves existing data.
+Retain Django's default User model for password hashing and sessions. A linked Account stores the canonical, case-insensitive unique email and product role; product login uses an email authentication backend, while Django admin retains its username backend. Product account creation stores the same normalized email on both records and uses an internal generated username; email changes are outside the current scope.
+
+Existing users with nonblank emails receive member Account records through a data migration that preserves their IDs, usernames, passwords, and staff flags. Duplicate legacy email addresses stop the migration for resolution, and users without email retain their existing Django login without product access. The `create_administrator` command provisions new product administrators with validated passwords and no staff/superuser privileges; it does not overwrite or promote existing accounts.
+
+Invitation tokens are random UUIDs tied to an email and household. Acceptance claims the unused invitation and creates the membership in one transaction, with a database constraint limiting each user to one active membership. Existing accounts must authenticate with the invited email, and administrator accounts cannot accept member invitations; invalid or failed acceptance leaves the invitation unused. Password recovery remains planned.
 
 Household roles are product roles, separate from Django staff/superuser privileges:
 
@@ -105,7 +109,7 @@ Assignment notifications are stored during assignment operations, including recu
 
 Invitations and password recovery use email even though task notifications are internal. The console email backend supports local testing; configure SMTP through environment settings when real delivery is needed.
 
-Serve Bootstrap and application styling as static assets. Keep uploaded evidence separate from static files. In P2, validate image type and size, allow at most one image per submission, and enforce household access when retrieving it. Local media needs persistent storage and backups if used in a deployed environment.
+Serve the vendored Bootstrap 5.3.8 CSS and its MIT license from `chores/static/chores/`, without a runtime CDN dependency. Keep future uploaded evidence separate from static files. In P2, validate image type and size, allow at most one image per submission, and enforce household access when retrieving it. Local media needs persistent storage and backups if used in a deployed environment.
 
 ## Development and deployment boundaries
 
