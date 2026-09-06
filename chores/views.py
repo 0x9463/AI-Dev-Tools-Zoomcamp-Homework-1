@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError
 from django.db.models import Q
@@ -11,12 +10,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
+from .decorators import product_account_required
 from .forms import HouseholdForm, InvitationForm, SignupForm
 from .models import Account, Household, Invitation
 from .services import accept_invitation, create_household, is_administrator, send_invitation
 
 
-@login_required
+@product_account_required
 def home(request):
     household = Household.objects.filter(
         Q(admin=request.user) | Q(memberships__user=request.user, memberships__active=True)
@@ -26,7 +26,7 @@ def home(request):
     return render(request, "chores/home.html", {"can_create": is_administrator(request.user)})
 
 
-@login_required
+@product_account_required
 def household_home(request, pk):
     household = get_object_or_404(
         Household.objects.filter(Q(admin=request.user) | Q(memberships__user=request.user, memberships__active=True)).distinct(),
@@ -35,7 +35,7 @@ def household_home(request, pk):
     return render(request, "chores/household.html", {"household": household})
 
 
-@login_required
+@product_account_required
 @require_http_methods(["GET", "POST"])
 def household_create(request):
     if not is_administrator(request.user):
@@ -53,7 +53,7 @@ def household_create(request):
     return render(request, "chores/form.html", {"form": form, "title": "Create your household", "button": "Create household"})
 
 
-@login_required
+@product_account_required
 @require_http_methods(["GET", "POST"])
 def invitation_create(request, pk):
     household = get_object_or_404(Household, pk=pk, admin=request.user)

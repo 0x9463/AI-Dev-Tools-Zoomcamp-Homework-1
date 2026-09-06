@@ -52,6 +52,19 @@ The command prompts twice for a password without echoing it. It applies Django's
 password validators and refuses duplicate emails; it does not grant staff or
 superuser privileges or overwrite existing users.
 
+Use an interactive terminal that supports hidden password entry; the command
+refuses to continue if hidden input is unavailable. Email addresses are
+case-insensitive, so `ADMIN@example.com` identifies the same account as
+`admin@example.com`. Invalid email, mismatched passwords, and passwords rejected
+by the configured validators leave no new account.
+
+To exercise authentication alone, open http://127.0.0.1:8000/login/ and sign in
+with the provisioned email and password. The protected home page is available
+immediately, without creating a household. Choose **Sign out** in the navigation
+bar to end the session and return to the shared sign-in page. Visiting
+http://127.0.0.1:8000/ again redirects to sign-in. A product administrator cannot
+access Django admin unless maintenance privileges are granted separately.
+
 1. Run the server and sign in with that email and password.
 2. Create a household, then choose **Invite a member** and enter a different email.
 3. Copy the invitation URL printed in the server terminal by the console email backend.
@@ -123,3 +136,20 @@ features and migrations are retained. Verified with Python 3.14.4 and Django 5.2
 - `uv run python manage.py test` passed all 26 tests, including the admin login smoke test.
 - `uv run python manage.py runserver 127.0.0.1:8011 --noreload` served
   `/admin/login/` with HTTP 200; the server was stopped after verification.
+
+### Issue #2 verification (2026-09-06)
+
+Reused the email backend, Django session views, shared Bootstrap templates,
+account provisioning service, and existing identity migrations. Product pages
+now require a linked Account even for users signed in through Django admin;
+provisioning refuses password entry when the terminal cannot suppress echo.
+
+- `uv run python manage.py test chores.test_authentication` passed all 8 focused
+  tests, including actual migration execution against the temporary test database.
+- `uv run python manage.py check` reported no issues.
+- `uv run python manage.py makemigrations --check --dry-run` detected no changes.
+- `uv run python manage.py test` passed all 34 tests.
+- `git diff --check` passed.
+
+No remaining issue #2 limitations. Existing data and migration history are
+preserved; no new migration or dependency is needed.
