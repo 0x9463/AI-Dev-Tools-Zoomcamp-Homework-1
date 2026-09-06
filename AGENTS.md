@@ -13,6 +13,7 @@ Run from the repository root:
 ## Rules
 
 - Follow the issue workflow in [_docs/process.md](_docs/process.md).
+- When an issue requires product clarification, use the [Product Manager role](team/pm.md) to groom it before implementation. The PM updates the canonical GitHub issue and does not implement or test the feature.
 - Manage dependencies with uv through `pyproject.toml` and `uv.lock`; keep both consistent when dependencies change.
 - Keep changes within the current issue; do not silently expand scope.
 - Preserve migration history and existing data unless the task explicitly requires otherwise.
