@@ -2,7 +2,7 @@
 
 Status: selected architecture for implementation; only the Django scaffold currently exists.
 
-The [product specification](plan.md) defines behavior, scope, and priorities: P0, then P1, then P2. This document records the selected Option 1 architecture and does not add product requirements or prescribe a task sequence. Implementation work will be planned separately.
+The [product specification](plan.md) defines behavior, scope, and priorities: P0, then P1, then P2. This document records the selected Option 1 architecture and does not add product requirements or prescribe a task sequence. The [backlog](backlog.md) indexes implementation work tracked in GitHub Issues.
 
 ## Stack and rationale
 
@@ -125,6 +125,6 @@ SQLite remains the initial database choice. Revisit PostgreSQL if concurrent wri
 
 Add focused Django tests with each behavior, especially household isolation, membership removal, task transitions, repeated approval requests, historical preservation, recurrence retries, and time boundaries. Finish with the specification's full administrator/member journey.
 
-The specification prioritizes the P0 essential workflow, followed by P1 organization and P2 engagement. Required rejection reasons belong to P0; optional comments and photos belong to P2. These priorities guide scope; individual implementation steps will be defined separately.
+The specification prioritizes the P0 essential workflow, followed by P1 organization and P2 engagement. Required rejection reasons belong to P0; optional comments and photos belong to P2. These priorities guide scope; individual implementation steps are tracked through the [backlog](backlog.md).
 
 The exclusions in specification section 20 remain in force. Social login, frontend architecture changes, and additional infrastructure are not part of the selected initial implementation.

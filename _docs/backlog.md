@@ -1,6 +1,6 @@
-# MVP tasks
+# MVP backlog
 
-Tasks are tracked in [GitHub Issues](https://github.com/0x9463/AI-Dev-Tools-Zoomcamp-Homework-1/issues). Each issue contains the original goal and description plus project context.
+Backlog items are tracked in [GitHub Issues](https://github.com/0x9463/AI-Dev-Tools-Zoomcamp-Homework-1/issues). Each issue contains the original goal and description plus project context.
 
 Product requirements: [plan.md](plan.md). Architecture: [arch.md](arch.md).
 
