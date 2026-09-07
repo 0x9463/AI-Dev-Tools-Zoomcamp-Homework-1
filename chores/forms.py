@@ -2,7 +2,13 @@ from django import forms
 from django.contrib.auth import authenticate, get_user_model, password_validation
 from django.core.exceptions import ValidationError
 
-from .models import Household
+from .models import Household, Task
+from .services import eligible_assignees
+
+
+class AssigneeChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, user):
+        return f"{user.first_name} ({user.email})" if user.first_name else user.email
 
 
 class BootstrapFormMixin:
@@ -41,6 +47,18 @@ class HouseholdForm(BootstrapFormMixin, forms.ModelForm):
 
 class InvitationForm(BootstrapFormMixin, forms.Form):
     email = forms.EmailField()
+
+
+class TaskForm(BootstrapFormMixin, forms.ModelForm):
+    assigned_user = AssigneeChoiceField(queryset=get_user_model().objects.none(), label="Responsible member")
+
+    class Meta:
+        model = Task
+        fields = ["title", "description", "assigned_user"]
+
+    def __init__(self, *args, household, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["assigned_user"].queryset = eligible_assignees(household)
 
 
 class SignupForm(BootstrapFormMixin, forms.Form):

@@ -1,0 +1,12 @@
+{% extends "chores/base.html" %}
+{% block title %}{{ task.title }} · {{ household.name }}{% endblock %}
+{% block content %}
+<h1 class="h3">{{ task.title }}</h1>
+<p>{{ task.get_status_display }}</p>
+{% if task.description %}<div class="mb-3">{{ task.description|linebreaksbr }}</div>{% endif %}
+<dl>
+  <dt>Responsible member</dt><dd>{{ task.assigned_user.first_name }} {{ task.assigned_user.email }}</dd>
+  <dt>Created</dt><dd>{{ task.created_at|date:"Y-m-d H:i:s T" }}</dd>
+</dl>
+<a href="{% url 'task_list' household.pk %}">Back to tasks</a>
+{% endblock %}

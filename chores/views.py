@@ -11,9 +11,53 @@ from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from .decorators import product_account_required
-from .forms import HouseholdForm, InvitationForm, SignupForm
-from .models import Account, Household, Invitation
-from .services import accept_invitation, create_household, is_administrator, send_invitation
+from .forms import HouseholdForm, InvitationForm, SignupForm, TaskForm
+from .models import Account, Household, Invitation, Task
+from .services import accept_invitation, create_household, create_task, is_administrator, send_invitation
+
+
+def accessible_households(user):
+    return Household.objects.filter(
+        Q(admin=user) | Q(memberships__user=user, memberships__active=True)
+    ).distinct()
+
+
+@product_account_required
+@require_http_methods(["GET"])
+def task_list(request, pk):
+    household = get_object_or_404(accessible_households(request.user), pk=pk)
+    return render(request, "chores/task_list.html", {
+        "household": household, "tasks": household.tasks.select_related("assigned_user"),
+        "can_create": household.admin_id == request.user.pk and is_administrator(request.user),
+    })
+
+
+@product_account_required
+@require_http_methods(["GET"])
+def task_detail(request, pk, task_pk):
+    household = get_object_or_404(accessible_households(request.user), pk=pk)
+    task = get_object_or_404(Task.objects.select_related("assigned_user"), household=household, pk=task_pk)
+    return render(request, "chores/task_detail.html", {"household": household, "task": task})
+
+
+@product_account_required
+@require_http_methods(["GET", "POST"])
+def task_create(request, pk):
+    household = get_object_or_404(Household, pk=pk, admin=request.user)
+    if not is_administrator(request.user):
+        raise PermissionDenied
+    form = TaskForm(request.POST if request.method == "POST" else None, household=household)
+    if request.method == "POST" and form.is_valid():
+        try:
+            task = create_task(household=household, user=request.user, **form.cleaned_data)
+        except ValidationError as error:
+            form.add_error(None, error)
+        else:
+            return redirect("task_detail", pk=household.pk, task_pk=task.pk)
+    return render(request, "chores/task_form.html", {
+        "household": household, "form": form,
+        "has_assignees": form.fields["assigned_user"].queryset.exists(),
+    })
 
 
 @product_account_required

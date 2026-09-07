@@ -2,6 +2,7 @@
 {% block title %}{{ household.name }} · Household chores{% endblock %}
 {% block content %}
 <h1 class="h3">{{ household.name }}</h1>
+<p><a href="{% url 'task_list' household.pk %}">View tasks</a></p>
 {% if household.admin_id == user.pk %}
 <p>You are the administrator of this household.</p>
 <a class="btn btn-primary" href="{% url 'create_invitation' household.pk %}">Invite a member</a>

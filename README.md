@@ -38,7 +38,9 @@ development-only secret key. Language and time zone retain Django's defaults.
 
 Implemented scope: backlog items #1–5 (bootstrap test, email authentication,
 household creation, invitation sending, and invitation acceptance).
-Chore management, completion reviews, scheduling, and engagement features remain future work.
+Basic task creation, household task lists/details, and atomic creation history are
+also implemented (#6). Completion reviews, task editing/cancellation, scheduling,
+and engagement features remain future work.
 
 ## Try the onboarding flow
 
@@ -82,6 +84,22 @@ nonblank emails receive member Account records during migration, with IDs,
 usernames, passwords, and staff flags preserved. Duplicate legacy emails stop the
 data migration for manual resolution; users without email retain their existing
 Django login but do not acquire product access. No database reset is required.
+
+## Create and read household tasks
+
+After applying migrations and inviting a member who has joined, choose **View
+tasks** from the household home, then **Create task** as the administrator. Enter
+a title, optionally a description, and choose an active household member. A
+successful creation opens the task detail with its assignee, creation time, and
+Pending status; the task and its creation-history event are stored together.
+
+All active household members can read the household list and every task detail,
+including assignments to other members. Only the administrator can create tasks.
+An empty household list shows **No tasks yet**; the creation form explains when
+there are no eligible members. Apply the additive migration with
+`uv run python manage.py migrate`; existing households and memberships are retained.
+
+Run focused task checks with `uv run python manage.py test chores.test_tasks`.
 
 ## Invitation email configuration
 

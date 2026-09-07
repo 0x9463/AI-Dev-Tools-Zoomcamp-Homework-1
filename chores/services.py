@@ -9,13 +9,34 @@ from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Account, Household, HouseholdMember, Invitation
+from .models import Account, Household, HouseholdMember, Invitation, Task, TaskHistory
 
 
 def is_administrator(user):
     return user.is_authenticated and Account.objects.filter(
         user=user, role=Account.Role.ADMINISTRATOR
     ).exists()
+
+
+def eligible_assignees(household):
+    return get_user_model().objects.filter(
+        householdmember__household=household, householdmember__active=True,
+        is_active=True, account__role=Account.Role.MEMBER,
+    ).order_by("email")
+
+
+@transaction.atomic
+def create_task(*, household, user, title, description="", assigned_user):
+    if household.admin_id != user.pk or not is_administrator(user):
+        raise PermissionDenied
+    if not eligible_assignees(household).filter(pk=assigned_user.pk).exists():
+        raise ValidationError("Choose an active member of this household.")
+    task = Task(household=household, title=title.strip(), description=description,
+                assigned_user=assigned_user)
+    task.full_clean()
+    task.save()
+    TaskHistory.objects.create(task=task, actor=user, event_type="created")
+    return task
 
 
 @transaction.atomic
