@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 from .decorators import product_account_required
 from .forms import HouseholdForm, InvitationForm, SignupForm, TaskForm
 from .models import Account, CompletionSubmission, Household, Invitation, Task
-from .services import accept_invitation, approve_submission, can_submit_completion, create_household, create_task, is_administrator, reject_submission, send_invitation, submit_completion
+from .services import accept_invitation, approve_submission, can_submit_completion, create_household, create_task, edit_task, is_administrator, reject_submission, send_invitation, submit_completion
 
 
 def accessible_households(user):
@@ -54,6 +54,7 @@ def task_detail(request, pk, task_pk):
         "household": household, "task": task,
         "can_submit": task.status == Task.Status.PENDING and can_submit_completion(task, request.user),
         "submissions": task.submissions.select_related("submitter", "reviewer").order_by("submitted_at", "pk"),
+        "can_edit": household.admin_id == request.user.pk and is_administrator(request.user),
     })
 
 
@@ -97,6 +98,25 @@ def administrator_household(user, pk):
     if not is_administrator(user):
         raise PermissionDenied
     return get_object_or_404(Household, pk=pk, admin=user)
+
+
+@product_account_required
+@require_http_methods(["GET", "POST"])
+def task_edit(request, pk, task_pk):
+    household = administrator_household(request.user, pk)
+    task = get_object_or_404(Task, pk=task_pk, household=household)
+    form = TaskForm(request.POST if request.method == "POST" else None, instance=task, household=household)
+    if request.method == "POST" and form.is_valid():
+        try:
+            task = edit_task(household=household, task_pk=task.pk, user=request.user, **form.cleaned_data)
+        except ValidationError as error:
+            form.add_error(None, error)
+        else:
+            return redirect("task_detail", pk=household.pk, task_pk=task.pk)
+    return render(request, "chores/task_form.html", {
+        "household": household, "form": form, "editing": True,
+        "has_assignees": form.fields["assigned_user"].queryset.exists(),
+    })
 
 
 @product_account_required

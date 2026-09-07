@@ -2,6 +2,7 @@
 {% block title %}{{ task.title }} · {{ household.name }}{% endblock %}
 {% block content %}
 <h1 class="h3">{{ task.title }}</h1>
+{% if can_edit %}<p><a href="{% url 'task_edit' household.pk task.pk %}">Edit task</a></p>{% endif %}
 <p>{{ task.get_status_display }}</p>
 {% if task.description %}<div class="mb-3">{{ task.description|linebreaksbr }}</div>{% endif %}
 <dl>

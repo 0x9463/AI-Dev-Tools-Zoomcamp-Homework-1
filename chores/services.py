@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import transaction
+from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 
@@ -36,6 +37,30 @@ def create_task(*, household, user, title, description="", assigned_user):
     task.full_clean()
     task.save()
     TaskHistory.objects.create(task=task, actor=user, event_type="created")
+    return task
+
+
+@transaction.atomic
+def edit_task(*, household, task_pk, user, title, description="", assigned_user):
+    if not user.is_active or household.admin_id != user.pk or not is_administrator(user):
+        raise PermissionDenied
+    # Serialize edits with submissions/reviews before reading the current values.
+    if not Task.objects.filter(pk=task_pk, household=household).update(title=F("title")):
+        raise ValidationError("This task does not belong to this household.")
+    task = Task.objects.get(pk=task_pk, household=household)
+    if not eligible_assignees(household).filter(pk=assigned_user.pk).exists():
+        raise ValidationError("Choose an active member of this household.")
+    values = {"title": title.strip(), "description": description, "assigned_user_id": assigned_user.pk}
+    changes = {}
+    for field, value in values.items():
+        old_value = getattr(task, field)
+        if old_value != value:
+            changes[field] = {"old": old_value, "new": value}
+            setattr(task, field, value)
+    task.full_clean()
+    if changes:
+        task.save(update_fields=[*changes, "updated_at"])
+        TaskHistory.objects.create(task=task, actor=user, event_type="edited", changes=changes)
     return task
 
 

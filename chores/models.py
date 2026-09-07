@@ -94,3 +94,4 @@ class TaskHistory(models.Model):
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     event_type = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
+    changes = models.JSONField(default=dict, blank=True)

@@ -1,11 +1,11 @@
 {% extends "chores/base.html" %}
-{% block title %}Create task · {{ household.name }}{% endblock %}
+{% block title %}{% if editing %}Edit task{% else %}Create task{% endif %} · {{ household.name }}{% endblock %}
 {% block content %}
-<h1 class="h3">Create task · {{ household.name }}</h1>
-{% if not has_assignees %}<p class="alert alert-info">No active members are available. Invite a member and have them join before creating a task.</p>{% endif %}
+<h1 class="h3">{% if editing %}Edit task{% else %}Create task{% endif %} · {{ household.name }}</h1>
+{% if not has_assignees %}<p class="alert alert-info">No active members are available. Invite a member and have them join before {% if editing %}editing{% else %}creating{% endif %} a task.</p>{% endif %}
 <form method="post">
   {% csrf_token %}{% include "chores/fields.html" %}
-  <button class="btn btn-primary" type="submit"{% if not has_assignees %} disabled{% endif %}>Create task</button>
+  <button class="btn btn-primary" type="submit"{% if not has_assignees %} disabled{% endif %}>{% if editing %}Save changes{% else %}Create task{% endif %}</button>
 </form>
 <a href="{% url 'task_list' household.pk %}">Back to tasks</a>
 {% endblock %}
