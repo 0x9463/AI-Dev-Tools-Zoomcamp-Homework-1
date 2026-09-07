@@ -8,5 +8,6 @@
 <a class="btn btn-primary" href="{% url 'create_invitation' household.pk %}">Invite a member</a>
 {% else %}
 <p>You are a member of this household.</p>
+<p><a href="{% url 'my_tasks' household.pk %}">My Tasks</a></p>
 {% endif %}
 {% endblock %}

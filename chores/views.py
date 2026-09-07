@@ -34,6 +34,19 @@ def task_list(request, pk):
 
 @product_account_required
 @require_http_methods(["GET"])
+def my_tasks(request, pk):
+    household = get_object_or_404(
+        Household.objects.filter(memberships__user=request.user, memberships__active=True), pk=pk,
+    )
+    return render(request, "chores/task_list.html", {
+        "household": household,
+        "tasks": household.tasks.filter(assigned_user=request.user).select_related("assigned_user"),
+        "my_tasks": True,
+    })
+
+
+@product_account_required
+@require_http_methods(["GET"])
 def task_detail(request, pk, task_pk):
     household = get_object_or_404(accessible_households(request.user), pk=pk)
     task = get_object_or_404(Task.objects.select_related("assigned_user"), household=household, pk=task_pk)

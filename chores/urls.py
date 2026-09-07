@@ -11,6 +11,7 @@ urlpatterns = [
     path("households/new/", views.household_create, name="household_create"),
     path("households/<int:pk>/", views.household_home, name="household_home"),
     path("households/<int:pk>/tasks/", views.task_list, name="task_list"),
+    path("households/<int:pk>/tasks/mine/", views.my_tasks, name="my_tasks"),
     path("households/<int:pk>/tasks/new/", views.task_create, name="task_create"),
     path("households/<int:pk>/tasks/<int:task_pk>/", views.task_detail, name="task_detail"),
     path("households/<int:pk>/invite/", views.invitation_create, name="create_invitation"),

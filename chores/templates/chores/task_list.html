@@ -1,7 +1,12 @@
 {% extends "chores/base.html" %}
-{% block title %}Tasks · {{ household.name }}{% endblock %}
+{% block title %}{% if my_tasks %}My Tasks{% else %}Tasks{% endif %} · {{ household.name }}{% endblock %}
 {% block content %}
-<h1 class="h3">Tasks · {{ household.name }}</h1>
+<h1 class="h3">{% if my_tasks %}My Tasks{% else %}Tasks{% endif %} · {{ household.name }}</h1>
+{% if my_tasks %}
+<p><a href="{% url 'task_list' household.pk %}">All household tasks</a></p>
+{% elif household.admin_id != user.pk %}
+<p><a href="{% url 'my_tasks' household.pk %}">My Tasks</a></p>
+{% endif %}
 {% if can_create %}<a class="btn btn-primary mb-3" href="{% url 'task_create' household.pk %}">Create task</a>{% endif %}
 <ul class="list-group mb-3">
 {% for task in tasks %}
@@ -10,7 +15,7 @@
   <p class="mb-0">{{ task.assigned_user.first_name }} {{ task.assigned_user.email }} · {{ task.get_status_display }}</p>
   <small>Created {{ task.created_at|date:"Y-m-d H:i:s T" }}</small>
 </li>
-{% empty %}<li class="list-group-item">No tasks yet.</li>{% endfor %}
+{% empty %}<li class="list-group-item">{% if my_tasks %}You have no assigned tasks in this household.{% else %}No tasks yet.{% endif %}</li>{% endfor %}
 </ul>
 <a href="{% url 'household_home' household.pk %}">Back to household</a>
 {% endblock %}
