@@ -1,5 +1,5 @@
 [project]
-name = "household-chores"
+name = "chorehub"
 version = "0.1.0"
 description = "Shared household chores management application for AI Dev Tools Zoomcamp 2026."
 readme = "README.md"

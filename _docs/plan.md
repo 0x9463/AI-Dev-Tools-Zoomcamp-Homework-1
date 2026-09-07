@@ -1,4 +1,4 @@
-# MVP — Ferramenta de Gestão de Tarefas Domésticas Compartilhadas
+# ChoreHub — Shared Household Chores Manager
 
 ## 1. Objetivo
 

@@ -1,6 +1,6 @@
-# Household chores MVP architecture
+# ChoreHub — Shared Household Chores Manager
 
-Status: bootstrap and backlog items #2–5 are implemented: email authentication, household creation, invitations, and member signup. Remaining product capabilities below describe the planned architecture.
+Status: bootstrap, email authentication, households/invitations, assigned task lists and My Tasks, completion submission, approval, rejection/resubmission, and task editing/reassignment are implemented. Issue #11 (editing/reassignment) remains open pending independent QA. This document also describes planned capabilities; consult the [README](../README.md#current-features) for current scope and [GitHub Issues](https://github.com/0x9463/chorehub/issues) for delivery status.
 
 The [product specification](plan.md) defines behavior, scope, and priorities: P0, then P1, then P2. This document records the selected Option 1 architecture and does not add product requirements or prescribe a task sequence. The [backlog](backlog.md) indexes implementation work tracked in GitHub Issues.
 
