@@ -13,6 +13,7 @@ Run from the repository root:
 ## Rules
 
 - Follow the issue workflow in [_docs/process.md](_docs/process.md).
+- Use the [Orchestrator role](team/orchestrator.md) to coordinate one issue through readiness, PM when needed, Engineer implementation, and independent QA. The Orchestrator delegates role work, requires explicit handoff evidence, and escalates genuine blockers to the user.
 - When an issue requires product clarification, use the [Product Manager role](team/pm.md) to groom it before implementation. The PM updates the canonical GitHub issue and does not implement or test the feature.
 - Use the [Software Engineer role](team/software-engineer.md) to implement one groomed GitHub issue at a time, following its acceptance criteria without changing them and leaving the issue open.
 - After the Software Engineer reports implementation complete, use the [QA Engineer role](team/qa-engineer.md) for independent validation and a GitHub issue comment with a PASS or FAIL verdict. The Software Engineer must not perform QA on its own work. FAIL leaves the issue open for correction; only PASS makes it eligible for completion.
