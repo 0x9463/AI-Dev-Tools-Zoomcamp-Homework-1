@@ -1,431 +1,431 @@
 # ChoreHub — Shared Household Chores Manager
 
-## 1. Objetivo
+## 1. Objective
 
-Construir uma aplicação para uma única casa/grupo familiar, na qual um administrador organiza tarefas domésticas, atribui responsáveis, acompanha prazos e recorrências, valida conclusões e mantém um sistema simples de pontos e ranking.
+Build an application for a single household/family group, in which an administrator organizes household chores, assigns members, tracks deadlines and recurrence, validates completions, and maintains a simple points and ranking system.
 
-O MVP deve priorizar clareza operacional, controle pelo administrador e um fluxo simples para os membros.
-
----
-
-## 2. Papéis
-
-### 2.1 Administrador
-
-O administrador é responsável por:
-
-- criar e gerenciar a casa;
-- convidar membros;
-- criar, editar, excluir e reatribuir tarefas;
-- definir prioridade, categoria, prazo, recorrência e pontuação;
-- aprovar ou rejeitar tarefas marcadas como concluídas;
-- acompanhar tarefas pendentes, atrasadas e aguardando aprovação;
-- consultar histórico e ranking.
-
-### 2.2 Membro
-
-O membro pode:
-
-- visualizar todas as tarefas da casa;
-- alterar apenas tarefas atribuídas a ele;
-- marcar suas tarefas como concluídas;
-- anexar uma foto opcional;
-- comentar em suas tarefas;
-- solicitar troca de responsável com justificativa;
-- acompanhar seu próprio calendário;
-- visualizar rankings.
+The MVP must prioritize operational clarity, administrator control, and a simple workflow for members.
 
 ---
 
-## 3. Conta e acesso
+## 2. Roles
 
-### 3.1 Estrutura da casa
+### 2.1 Administrator
 
-- Cada conta de administrador gerencia apenas uma casa.
-- O administrador é o único responsável por adicionar membros.
-- Membros entram somente por convite enviado por e-mail.
+The administrator is responsible for:
 
-### 3.2 Cadastro do membro
+- creating and managing the household;
+- inviting members;
+- creating, editing, deleting, and reassigning tasks;
+- setting priority, category, deadline, recurrence, and points;
+- approving or rejecting tasks marked as completed;
+- tracking Pending, Overdue, and Awaiting approval tasks;
+- viewing history and rankings.
 
-O membro convidado pode criar sua conta por:
+### 2.2 Member
 
-- e-mail e senha; ou
-- login social.
+A member can:
 
-### 3.3 Regra crítica adicionada
-
-Para simplificar o MVP:
-
-- um membro não pode entrar em outra casa enquanto estiver vinculado à casa atual;
-- membros não podem sair da casa por conta própria no MVP;
-- somente o administrador pode removê-los.
-
-**Justificativa:** isso evita conflitos de propriedade, histórico, pontos e permissões durante a primeira versão.
+- view all household tasks;
+- modify only tasks assigned to them;
+- mark their tasks as completed;
+- attach an optional photo;
+- comment on their tasks;
+- request an assignee swap with a justification;
+- track their own calendar;
+- view rankings.
 
 ---
 
-## 4. Tarefas
+## 3. Accounts and access
 
-### 4.1 Criação
+### 3.1 Household structure
 
-Somente o administrador pode criar tarefas.
+- Each administrator account manages only one household.
+- The administrator is solely responsible for adding members.
+- Members join only through an invitation sent by email.
 
-Cada tarefa deve possuir:
+### 3.2 Member signup
 
-- título;
-- descrição opcional;
-- responsável;
-- categoria;
-- prioridade;
-- pontos;
-- prazo opcional;
-- recorrência opcional;
-- data de criação;
+An invited member can create an account using:
+
+- email and password; or
+- social login.
+
+### 3.3 Added critical rule
+
+To simplify the MVP:
+
+- a member cannot join another household while linked to the current household;
+- members cannot leave the household on their own in the MVP;
+- only the administrator can remove them.
+
+**Rationale:** this avoids conflicts involving ownership, history, points, and permissions in the first version.
+
+---
+
+## 4. Tasks
+
+### 4.1 Creation
+
+Only the administrator can create tasks.
+
+Each task must have:
+
+- a title;
+- an optional description;
+- an assignee;
+- a category;
+- a priority;
+- points;
+- an optional deadline;
+- optional recurrence;
+- a creation date;
+- a status.
+
+### 4.2 Priority
+
+Available values:
+
+- Low
+- Medium
+- High
+- Urgent
+
+### 4.3 Categories
+
+The system must offer initial categories, for example:
+
+- Cleaning
+- Kitchen
+- Shopping
+- Organization
+
+The administrator can also create new categories.
+
+### 4.4 Deadline
+
+The deadline is optional.
+
+A task with a deadline that passes its due date/time without completion must automatically be marked as **Overdue**.
+
+### 4.5 Recurrence
+
+The MVP must support:
+
+- daily;
+- weekly;
+- monthly;
+- specific days of the week.
+
+### 4.6 Added critical rule for recurrence
+
+Each recurring occurrence must generate its own task instance.
+
+Example:
+
+> “Wash the dishes — every Monday”
+
+Each Monday generates a new, independent occurrence, preserving the history of previous ones.
+
+**Rationale:** repeatedly editing the same task would destroy its history and undermine the rankings.
+
+---
+
+## 5. Task statuses
+
+The MVP must use the following statuses:
+
+1. **Pending** — created and not yet completed;
+2. **Overdue** — deadline passed without completion;
+3. **Awaiting approval** — member reported completion;
+4. **Completed** — administrator approved;
+5. **Canceled** — administrator canceled the task.
+
+### 5.1 Completion rejection
+
+When the administrator rejects a completion:
+
+- a comment is required;
+- the task returns to **Pending**;
+- the comment is recorded in the history.
+
+If the original deadline has already passed, it returns as **Overdue**.
+
+---
+
+## 6. Completion workflow
+
+1. The member performs the task.
+2. They can add a comment.
+3. They can attach an optional photo.
+4. They mark the task as completed.
+5. The status changes to **Awaiting approval**.
+6. The administrator reviews it.
+7. The administrator can:
+   - approve; or
+   - reject with a required comment.
+8. Points are credited only after approval.
+
+---
+
+## 7. Editing and reassignment
+
+The administrator can edit any task field at any time.
+
+They can also reassign the task to another member at any time.
+
+### 7.1 Added critical rule
+
+Every relevant change must record:
+
+- who made the change;
+- date/time;
+- previous value;
+- new value.
+
+This applies especially to:
+
+- assignee;
+- deadline;
+- priority;
+- points;
 - status.
 
-### 4.2 Prioridade
-
-Valores disponíveis:
-
-- Baixa
-- Média
-- Alta
-- Urgente
-
-### 4.3 Categorias
-
-O sistema deve oferecer categorias iniciais, por exemplo:
-
-- Limpeza
-- Cozinha
-- Compras
-- Organização
-
-O administrador também pode criar novas categorias.
-
-### 4.4 Prazo
-
-O prazo é opcional.
-
-Uma tarefa com prazo que ultrapasse a data/hora limite sem conclusão deve ser marcada automaticamente como **Atrasada**.
-
-### 4.5 Recorrência
-
-O MVP deve suportar:
-
-- diária;
-- semanal;
-- mensal;
-- dias específicos da semana.
-
-### 4.6 Regra crítica adicionada para recorrência
-
-Cada ocorrência recorrente deve gerar uma instância própria da tarefa.
-
-Exemplo:
-
-> “Lavar a louça — toda segunda-feira”
-
-Cada segunda-feira gera uma nova ocorrência independente, preservando o histórico das anteriores.
-
-**Justificativa:** editar a mesma tarefa repetidamente destruiria o histórico e prejudicaria o ranking.
+**Rationale:** because the administrator can edit tasks even after assignment, a small change history prevents inconsistencies and disputes.
 
 ---
 
-## 5. Status das tarefas
+## 8. Swap requests
 
-O MVP deve usar os seguintes status:
+A member can ask the administrator for a task swap.
 
-1. **Pendente** — criada e ainda não concluída;
-2. **Atrasada** — prazo expirado sem conclusão;
-3. **Aguardando aprovação** — membro informou conclusão;
-4. **Concluída** — administrador aprovou;
-5. **Cancelada** — administrador cancelou a tarefa.
+The request must contain:
 
-### 5.1 Rejeição da conclusão
+- task;
+- requesting member;
+- required justification;
+- request date;
+- request status.
 
-Quando o administrador rejeitar uma conclusão:
+Possible statuses:
 
-- deve informar obrigatoriamente um comentário;
-- a tarefa volta para **Pendente**;
-- o comentário fica registrado no histórico.
+- Pending
+- Accepted
+- Declined
 
-Se o prazo original já tiver expirado, ela retorna como **Atrasada**.
-
----
-
-## 6. Fluxo de conclusão
-
-1. O membro executa a tarefa.
-2. Pode adicionar um comentário.
-3. Pode anexar uma foto opcional.
-4. Marca a tarefa como concluída.
-5. O status passa para **Aguardando aprovação**.
-6. O administrador analisa.
-7. O administrador pode:
-   - aprovar; ou
-   - rejeitar com comentário obrigatório.
-8. Os pontos só são creditados após aprovação.
+Only the administrator decides whether the swap will take place.
 
 ---
 
-## 7. Edição e reatribuição
+## 9. Comments and attachments
 
-O administrador pode editar qualquer campo da tarefa a qualquer momento.
+### 9.1 Comments
 
-Também pode reatribuir a tarefa para outro membro a qualquer momento.
+The following can comment:
 
-### 7.1 Regra crítica adicionada
+- administrator;
+- member assigned to the task.
 
-Toda alteração relevante deve registrar:
+Other members can view the task but cannot comment.
 
-- quem realizou a alteração;
-- data/hora;
-- valor anterior;
-- novo valor.
+### 9.2 Photos
 
-Isso vale especialmente para:
+The assignee can attach an optional photo as evidence of the work performed.
 
-- responsável;
-- prazo;
-- prioridade;
-- pontos;
-- status.
+### 9.3 Suggested MVP limitation
 
-**Justificativa:** como o administrador pode editar tarefas mesmo depois de atribuídas, um pequeno histórico de alterações evita inconsistências e disputas.
+Allow at most one image per completion submission.
+
+**Rationale:** this reduces storage and interface complexity without preventing the main use case.
 
 ---
 
-## 8. Solicitação de troca
+## 10. Points
 
-O membro pode solicitar ao administrador a troca de uma tarefa.
+Each task has a point value.
 
-A solicitação deve conter:
+The system suggests an initial point value based on priority:
 
-- tarefa;
-- membro solicitante;
-- justificativa obrigatória;
-- data da solicitação;
-- status da solicitação.
-
-Status possíveis:
-
-- Pendente
-- Aceita
-- Recusada
-
-Somente o administrador decide se a troca será realizada.
-
----
-
-## 9. Comentários e anexos
-
-### 9.1 Comentários
-
-Podem comentar:
-
-- administrador;
-- membro responsável pela tarefa.
-
-Outros membros podem visualizar a tarefa, mas não comentar.
-
-### 9.2 Fotos
-
-O responsável pode anexar uma foto opcional como evidência da execução.
-
-### 9.3 Limitação sugerida para o MVP
-
-Permitir no máximo uma imagem por submissão de conclusão.
-
-**Justificativa:** reduz complexidade de armazenamento e interface sem impedir o principal caso de uso.
-
----
-
-## 10. Pontos
-
-Cada tarefa possui uma quantidade de pontos.
-
-O sistema sugere uma pontuação inicial com base na prioridade:
-
-| Prioridade | Pontos sugeridos |
+| Priority | Suggested points |
 |---|---:|
-| Baixa | 5 |
-| Média | 10 |
-| Alta | 20 |
-| Urgente | 30 |
+| Low | 5 |
+| Medium | 10 |
+| High | 20 |
+| Urgent | 30 |
 
-O administrador pode alterar o valor sugerido antes ou depois da criação da tarefa.
+The administrator can change the suggested value before or after creating the task.
 
-Os pontos somente são creditados quando a tarefa é aprovada.
+Points are credited only when the task is approved.
 
-### 10.1 Regra crítica adicionada
+### 10.1 Added critical rule
 
-Depois que uma tarefa for aprovada, os pontos registrados naquela conclusão ficam congelados para fins históricos.
+After a task is approved, the points recorded for that completion are frozen for historical purposes.
 
-Alterações futuras no valor padrão da tarefa recorrente afetam apenas novas ocorrências.
+Future changes to the recurring task's default value affect only new occurrences.
 
-**Justificativa:** evita alterar retroativamente rankings já calculados.
-
----
-
-## 11. Ranking
-
-O sistema deve apresentar:
-
-- ranking semanal;
-- ranking mensal;
-- ranking geral acumulado.
-
-O ranking é baseado exclusivamente em pontos de tarefas aprovadas.
-
-Não existem recompensas ou troca de pontos no MVP.
-
-### 11.1 Critério de desempate sugerido
-
-Em caso de empate em pontos:
-
-1. maior número de tarefas aprovadas;
-2. persistindo o empate, ambos ocupam a mesma posição.
+**Rationale:** this prevents retroactive changes to rankings that have already been calculated.
 
 ---
 
-## 12. Visualização das tarefas
+## 11. Rankings
 
-Todos os membros podem visualizar todas as tarefas da casa.
+The system must display:
 
-Porém:
+- weekly rankings;
+- monthly rankings;
+- overall cumulative rankings.
 
-- membros podem alterar apenas tarefas atribuídas a eles;
-- administrador pode alterar qualquer tarefa.
+Rankings are based exclusively on points from approved tasks.
 
-### 12.1 Filtros do administrador
+There are no rewards or point redemptions in the MVP.
 
-O administrador pode filtrar por:
+### 11.1 Suggested tie-break rule
+
+When points are tied:
+
+1. the greater number of approved tasks takes precedence;
+2. if the tie remains, both occupy the same position.
+
+---
+
+## 12. Task views
+
+All members can view all household tasks.
+
+However:
+
+- members can modify only tasks assigned to them;
+- the administrator can modify any task.
+
+### 12.1 Administrator filters
+
+The administrator can filter by:
 
 - status;
-- responsável;
-- prioridade;
-- categoria.
+- assignee;
+- priority;
+- category.
 
 ---
 
-## 13. Calendário
+## 13. Calendar
 
-### Administrador
+### Administrator
 
-Pode visualizar todas as tarefas em calendário com visões:
+Can view all tasks in a calendar with:
 
-- diária;
-- semanal;
-- mensal.
+- daily views;
+- weekly views;
+- monthly views.
 
-### Membro
+### Member
 
-Visualiza apenas suas próprias tarefas no calendário.
+Sees only their own tasks in the calendar.
 
-O calendário deve mostrar tarefas:
+The calendar must show tasks:
 
-- com prazo;
-- recorrentes.
-
----
-
-## 14. Painel do administrador
-
-O dashboard do administrador deve apresentar pelo menos:
-
-- quantidade de tarefas pendentes;
-- quantidade de tarefas atrasadas;
-- quantidade aguardando aprovação;
-- lista das tarefas que exigem aprovação;
-- próximas tarefas com prazo.
-
-Gráficos avançados e indicadores de desempenho ficam fora do MVP.
+- with deadlines;
+- with recurrence.
 
 ---
 
-## 15. Histórico
+## 14. Administrator dashboard
 
-O administrador pode consultar histórico completo contendo:
+The administrator dashboard must display at least:
 
-- tarefas concluídas;
-- tarefas rejeitadas;
-- tarefas atrasadas;
-- responsáveis;
-- datas de conclusão e aprovação;
-- pontos concedidos;
-- comentários de rejeição;
-- alterações relevantes.
+- number of Pending tasks;
+- number of Overdue tasks;
+- number Awaiting approval;
+- list of tasks requiring approval;
+- upcoming tasks with deadlines.
 
-### Regra crítica adicionada
-
-Tarefas concluídas não devem ser apagadas fisicamente pelo sistema.
-
-Quando necessário, ficam registradas no histórico.
-
-**Justificativa:** histórico e ranking dependem desses registros.
+Advanced charts and performance indicators are outside the MVP scope.
 
 ---
 
-## 16. Notificações
+## 15. History
 
-O MVP deve gerar notificações quando:
+The administrator can view a complete history containing:
 
-- uma tarefa for atribuída ao membro;
-- o prazo estiver próximo.
+- completed tasks;
+- rejected tasks;
+- overdue tasks;
+- assignees;
+- completion and approval dates;
+- points awarded;
+- rejection comments;
+- relevant changes.
 
-### Regra sugerida para prazo próximo
+### Added critical rule
 
-Considerar “próximo do prazo” como **24 horas antes**.
+Completed tasks must not be physically deleted by the system.
 
-Para tarefas com prazo inferior a 24 horas após a criação, enviar apenas a notificação de atribuição.
+When necessary, they remain recorded in the history.
 
-### Escopo técnico sugerido
-
-No MVP, as notificações podem ser internas na própria aplicação.
-
-E-mail, push notification e WhatsApp ficam para versões futuras.
-
-**Justificativa:** reduz dependências externas e mantém o foco no fluxo principal.
+**Rationale:** history and rankings depend on these records.
 
 ---
 
-## 17. Telas mínimas
+## 16. Notifications
 
-### Públicas
+The MVP must generate notifications when:
+
+- a task is assigned to a member;
+- a deadline is approaching.
+
+### Suggested rule for approaching deadlines
+
+Treat “approaching the deadline” as **24 hours beforehand**.
+
+For tasks due less than 24 hours after creation, send only the assignment notification.
+
+### Suggested technical scope
+
+In the MVP, notifications can be internal to the application itself.
+
+Email, push notifications, and WhatsApp are left for future versions.
+
+**Rationale:** this reduces external dependencies and keeps the focus on the main workflow.
+
+---
+
+## 17. Minimum screens
+
+### Public
 
 1. Login
-2. Cadastro por convite
-3. Recuperação de senha
+2. Invitation-based signup
+3. Password recovery
 
-### Administrador
+### Administrator
 
 4. Dashboard
-5. Lista de tarefas
-6. Criar/editar tarefa
-7. Detalhes da tarefa
-8. Aprovações pendentes
-9. Calendário
-10. Membros da casa
-11. Categorias
-12. Ranking
-13. Histórico
+5. Task list
+6. Create/edit task
+7. Task details
+8. Pending approvals
+9. Calendar
+10. Household members
+11. Categories
+12. Rankings
+13. History
 
-### Membro
+### Member
 
-14. Minhas tarefas
-15. Detalhes da tarefa
-16. Enviar conclusão
-17. Solicitar troca
-18. Meu calendário
-19. Ranking
-20. Notificações
+14. My Tasks
+15. Task details
+16. Submit completion
+17. Request swap
+18. My calendar
+19. Rankings
+20. Notifications
 
 ---
 
-## 18. Entidades principais
+## 18. Main entities
 
-Uma estrutura de dados mínima pode conter:
+A minimal data structure can contain:
 
 ### User
 
@@ -527,115 +527,115 @@ Uma estrutura de dados mínima pode conter:
 
 ---
 
-## 19. Regras de permissão resumidas
+## 19. Permission rules summary
 
-| Ação | Administrador | Membro responsável | Outro membro |
+| Action | Administrator | Assigned member | Other member |
 |---|:---:|:---:|:---:|
-| Visualizar tarefa | ✓ | ✓ | ✓ |
-| Criar tarefa | ✓ | ✗ | ✗ |
-| Editar tarefa | ✓ | Limitado | ✗ |
-| Excluir/cancelar tarefa | ✓ | ✗ | ✗ |
-| Reatribuir tarefa | ✓ | ✗ | ✗ |
-| Marcar como concluída | ✓ | ✓ | ✗ |
-| Aprovar conclusão | ✓ | ✗ | ✗ |
-| Rejeitar conclusão | ✓ | ✗ | ✗ |
-| Comentar | ✓ | ✓ | ✗ |
-| Solicitar troca | ✗ | ✓ | ✗ |
-| Ver ranking | ✓ | ✓ | ✓ |
+| View task | ✓ | ✓ | ✓ |
+| Create task | ✓ | ✗ | ✗ |
+| Edit task | ✓ | Limited | ✗ |
+| Delete/cancel task | ✓ | ✗ | ✗ |
+| Reassign task | ✓ | ✗ | ✗ |
+| Mark as completed | ✓ | ✓ | ✗ |
+| Approve completion | ✓ | ✗ | ✗ |
+| Reject completion | ✓ | ✗ | ✗ |
+| Comment | ✓ | ✓ | ✗ |
+| Request swap | ✗ | ✓ | ✗ |
+| View rankings | ✓ | ✓ | ✓ |
 
 ---
 
-## 20. Fora do escopo do MVP
+## 20. Outside the MVP scope
 
-Para manter o trabalho controlável, ficam explicitamente fora da primeira versão:
+To keep the work manageable, the following are explicitly outside the first version:
 
-- múltiplas casas por usuário;
-- membros participando de várias casas;
-- troca direta de tarefas entre membros;
-- chat privado;
-- recompensas por pontos;
-- badges/conquistas;
-- inteligência artificial para distribuição de tarefas;
-- distribuição automática;
-- geolocalização;
-- integração com calendários externos;
-- notificações por WhatsApp/SMS;
-- analytics avançado;
-- gráficos de produtividade;
-- múltiplos anexos por conclusão;
-- dependências entre tarefas;
-- subtarefas;
-- marketplace de recompensas;
-- pagamentos.
-
----
-
-## 21. Critérios de sucesso do MVP
-
-O MVP pode ser considerado funcional quando for possível executar integralmente este cenário:
-
-1. Administrador cria uma casa.
-2. Convida um membro por e-mail.
-3. Membro cria sua conta e entra na casa.
-4. Administrador cria uma tarefa e atribui ao membro.
-5. Define prioridade, categoria, pontos e prazo.
-6. Membro recebe a tarefa.
-7. Membro marca a tarefa como concluída e opcionalmente envia foto/comentário.
-8. Administrador recebe a conclusão para validação.
-9. Administrador aprova ou rejeita.
-10. Se aprovada, os pontos entram no ranking.
-11. Se rejeitada, a tarefa volta para execução com justificativa registrada.
-12. Administrador consegue consultar o histórico.
-13. Tarefas recorrentes geram novas ocorrências corretamente.
-14. Calendário e notificações refletem os prazos relevantes.
+- multiple households per user;
+- members participating in multiple households;
+- direct task swaps between members;
+- private chat;
+- rewards for points;
+- badges/achievements;
+- artificial intelligence for task assignment;
+- automatic assignment;
+- geolocation;
+- integration with external calendars;
+- WhatsApp/SMS notifications;
+- advanced analytics;
+- productivity charts;
+- multiple attachments per completion;
+- task dependencies;
+- subtasks;
+- rewards marketplace;
+- payments.
 
 ---
 
-## 22. Prioridade de implementação
+## 21. MVP success criteria
 
-### P0 — Fluxo essencial
+The MVP can be considered functional when this scenario can be carried out in full:
 
-- autenticação;
-- casa e membros;
-- convite;
-- CRUD de tarefas;
-- atribuição;
-- status;
-- conclusão;
-- aprovação/rejeição;
-- histórico básico.
-
-### P1 — Organização
-
-- categorias;
-- prioridades;
-- prazos;
-- recorrência;
-- filtros;
-- calendário.
-
-### P2 — Engajamento
-
-- pontos;
-- ranking;
-- comentários;
-- foto de evidência;
-- solicitações de troca;
-- notificações internas.
+1. The administrator creates a household.
+2. Invites a member by email.
+3. The member creates an account and joins the household.
+4. The administrator creates a task and assigns it to the member.
+5. Sets priority, category, points, and deadline.
+6. The member receives the task.
+7. The member marks the task as completed and optionally submits a photo/comment.
+8. The administrator receives the completion for validation.
+9. The administrator approves or rejects it.
+10. If approved, the points count toward the rankings.
+11. If rejected, the task returns for another attempt with the justification recorded.
+12. The administrator can view the history.
+13. Recurring tasks generate new occurrences correctly.
+14. The calendar and notifications reflect the relevant deadlines.
 
 ---
 
-## 23. Resumo do produto
+## 22. Implementation priority
 
-O produto é uma aplicação de gestão doméstica centralizada no administrador. O administrador organiza e distribui tarefas, enquanto os membros executam e submetem suas conclusões para validação.
+### P0 — Essential workflow
 
-A principal diferença em relação a uma lista de tarefas comum é a combinação de:
+- authentication;
+- household and members;
+- invitations;
+- task CRUD;
+- assignment;
+- statuses;
+- completion;
+- approval/rejection;
+- basic history.
 
-- responsabilidade individual;
-- validação da execução;
-- histórico auditável;
-- tarefas recorrentes;
-- calendário;
-- pontuação e ranking.
+### P1 — Organization
 
-Essa combinação é suficiente para produzir um MVP demonstrável sem introduzir complexidades desnecessárias como múltiplas casas, distribuição inteligente, recompensas ou integrações externas.
+- categories;
+- priorities;
+- deadlines;
+- recurrence;
+- filters;
+- calendar.
+
+### P2 — Engagement
+
+- points;
+- rankings;
+- comments;
+- evidence photo;
+- swap requests;
+- internal notifications.
+
+---
+
+## 23. Product summary
+
+The product is a household management application centered on the administrator. The administrator organizes and assigns tasks, while members perform them and submit their completions for validation.
+
+The main difference from an ordinary task list is the combination of:
+
+- individual responsibility;
+- validation of the work performed;
+- auditable history;
+- recurring tasks;
+- calendar;
+- points and rankings.
+
+This combination is sufficient to produce a demonstrable MVP without introducing unnecessary complexity such as multiple households, intelligent assignment, rewards, or external integrations.
