@@ -14,5 +14,17 @@
   <button class="btn btn-primary" type="submit">Submit completion</button>
 </form>
 {% endif %}
+{% if submissions %}
+<h2 class="h5">Completion submissions</h2>
+<ul class="list-group mb-3">
+{% for submission in submissions %}
+<li class="list-group-item">
+  <p>{{ submission.get_status_display }} · Submitted by {{ submission.submitter.first_name }} {{ submission.submitter.email }} at {{ submission.submitted_at|date:"Y-m-d H:i:s T" }}</p>
+  {% if submission.reviewed_at %}<p>Reviewed by {{ submission.reviewer.first_name }} {{ submission.reviewer.email }} at {{ submission.reviewed_at|date:"Y-m-d H:i:s T" }}</p>{% endif %}
+  {% if submission.rejection_reason %}<p>Rejection reason: {{ submission.rejection_reason|linebreaksbr }}</p>{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}
 <a href="{% url 'task_list' household.pk %}">Back to tasks</a>
 {% endblock %}

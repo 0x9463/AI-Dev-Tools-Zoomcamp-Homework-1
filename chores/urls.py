@@ -13,6 +13,7 @@ urlpatterns = [
     path("households/<int:pk>/tasks/", views.task_list, name="task_list"),
     path("households/<int:pk>/approvals/", views.pending_approvals, name="pending_approvals"),
     path("households/<int:pk>/approvals/<int:submission_pk>/approve/", views.submission_approve, name="submission_approve"),
+    path("households/<int:pk>/approvals/<int:submission_pk>/reject/", views.submission_reject, name="submission_reject"),
     path("households/<int:pk>/tasks/mine/", views.my_tasks, name="my_tasks"),
     path("households/<int:pk>/tasks/new/", views.task_create, name="task_create"),
     path("households/<int:pk>/tasks/<int:task_pk>/", views.task_detail, name="task_detail"),

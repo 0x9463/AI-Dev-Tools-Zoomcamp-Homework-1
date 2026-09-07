@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 from .decorators import product_account_required
 from .forms import HouseholdForm, InvitationForm, SignupForm, TaskForm
 from .models import Account, CompletionSubmission, Household, Invitation, Task
-from .services import accept_invitation, approve_submission, can_submit_completion, create_household, create_task, is_administrator, send_invitation, submit_completion
+from .services import accept_invitation, approve_submission, can_submit_completion, create_household, create_task, is_administrator, reject_submission, send_invitation, submit_completion
 
 
 def accessible_households(user):
@@ -53,6 +53,7 @@ def task_detail(request, pk, task_pk):
     return render(request, "chores/task_detail.html", {
         "household": household, "task": task,
         "can_submit": task.status == Task.Status.PENDING and can_submit_completion(task, request.user),
+        "submissions": task.submissions.select_related("submitter", "reviewer").order_by("submitted_at", "pk"),
     })
 
 
@@ -120,6 +121,21 @@ def submission_approve(request, pk, submission_pk):
         messages.error(request, " ".join(error.messages))
     else:
         messages.success(request, "Submission approved. Task completed.")
+    return redirect("pending_approvals", pk=household.pk)
+
+
+@product_account_required
+@require_http_methods(["POST"])
+def submission_reject(request, pk, submission_pk):
+    household = administrator_household(request.user, pk)
+    submission = get_object_or_404(CompletionSubmission, pk=submission_pk, task__household=household)
+    try:
+        reject_submission(household=household, submission_pk=submission.pk, user=request.user,
+                          reason=request.POST.get("reason", ""))
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+    else:
+        messages.success(request, "Submission rejected. Task returned to Pending.")
     return redirect("pending_approvals", pk=household.pk)
 
 

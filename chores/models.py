@@ -73,6 +73,7 @@ class CompletionSubmission(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
         APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
 
     task = models.ForeignKey(Task, on_delete=models.PROTECT, related_name="submissions")
     submitter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
@@ -80,6 +81,7 @@ class CompletionSubmission(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="reviewed_submissions")
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
 
     class Meta:
         constraints = [models.UniqueConstraint(
