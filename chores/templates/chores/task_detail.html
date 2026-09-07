@@ -8,5 +8,11 @@
   <dt>Responsible member</dt><dd>{{ task.assigned_user.first_name }} {{ task.assigned_user.email }}</dd>
   <dt>Created</dt><dd>{{ task.created_at|date:"Y-m-d H:i:s T" }}</dd>
 </dl>
+{% if can_submit %}
+<form method="post" action="{% url 'task_submit' household.pk task.pk %}" class="mb-3">
+  {% csrf_token %}
+  <button class="btn btn-primary" type="submit">Submit completion</button>
+</form>
+{% endif %}
 <a href="{% url 'task_list' household.pk %}">Back to tasks</a>
 {% endblock %}

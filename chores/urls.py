@@ -14,6 +14,7 @@ urlpatterns = [
     path("households/<int:pk>/tasks/mine/", views.my_tasks, name="my_tasks"),
     path("households/<int:pk>/tasks/new/", views.task_create, name="task_create"),
     path("households/<int:pk>/tasks/<int:task_pk>/", views.task_detail, name="task_detail"),
+    path("households/<int:pk>/tasks/<int:task_pk>/submit/", views.task_submit, name="task_submit"),
     path("households/<int:pk>/invite/", views.invitation_create, name="create_invitation"),
     path("invitations/<uuid:token>/", views.invitation_accept, name="accept_invitation"),
 ]

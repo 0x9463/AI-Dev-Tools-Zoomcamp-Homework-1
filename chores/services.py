@@ -9,7 +9,7 @@ from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Account, Household, HouseholdMember, Invitation, Task, TaskHistory
+from .models import Account, CompletionSubmission, Household, HouseholdMember, Invitation, Task, TaskHistory
 
 
 def is_administrator(user):
@@ -37,6 +37,30 @@ def create_task(*, household, user, title, description="", assigned_user):
     task.save()
     TaskHistory.objects.create(task=task, actor=user, event_type="created")
     return task
+
+
+@transaction.atomic
+def submit_completion(*, household, task_pk, user):
+    # Claim Pending with the first write; SQLite serializes competing submissions.
+    claimed = Task.objects.filter(pk=task_pk, household=household, status=Task.Status.PENDING).update(
+        status=Task.Status.AWAITING_APPROVAL, updated_at=timezone.now(),
+    )
+    if not claimed:
+        raise ValidationError("Only Pending tasks can be submitted for approval.")
+    task = Task.objects.get(pk=task_pk, household=household)
+    if not can_submit_completion(task, user):
+        raise PermissionDenied
+    submission = CompletionSubmission.objects.create(task=task, submitter=user)
+    TaskHistory.objects.create(task=task, actor=user, event_type="completion_submitted")
+    return submission
+
+
+def can_submit_completion(task, user):
+    if not user.is_authenticated or not user.is_active:
+        return False
+    if task.household.admin_id == user.pk and is_administrator(user):
+        return True
+    return task.assigned_user_id == user.pk and eligible_assignees(task.household).filter(pk=user.pk).exists()
 
 
 @transaction.atomic

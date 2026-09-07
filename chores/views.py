@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 from .decorators import product_account_required
 from .forms import HouseholdForm, InvitationForm, SignupForm, TaskForm
 from .models import Account, Household, Invitation, Task
-from .services import accept_invitation, create_household, create_task, is_administrator, send_invitation
+from .services import accept_invitation, can_submit_completion, create_household, create_task, is_administrator, send_invitation, submit_completion
 
 
 def accessible_households(user):
@@ -50,7 +50,26 @@ def my_tasks(request, pk):
 def task_detail(request, pk, task_pk):
     household = get_object_or_404(accessible_households(request.user), pk=pk)
     task = get_object_or_404(Task.objects.select_related("assigned_user"), household=household, pk=task_pk)
-    return render(request, "chores/task_detail.html", {"household": household, "task": task})
+    return render(request, "chores/task_detail.html", {
+        "household": household, "task": task,
+        "can_submit": task.status == Task.Status.PENDING and can_submit_completion(task, request.user),
+    })
+
+
+@product_account_required
+@require_http_methods(["POST"])
+def task_submit(request, pk, task_pk):
+    household = get_object_or_404(accessible_households(request.user), pk=pk)
+    task = get_object_or_404(Task, household=household, pk=task_pk)
+    if not can_submit_completion(task, request.user):
+        raise PermissionDenied
+    try:
+        submit_completion(household=household, task_pk=task.pk, user=request.user)
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+    else:
+        messages.success(request, "Completion submitted for approval.")
+    return redirect("task_detail", pk=household.pk, task_pk=task.pk)
 
 
 @product_account_required

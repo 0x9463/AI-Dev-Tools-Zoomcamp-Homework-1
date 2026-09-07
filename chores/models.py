@@ -54,6 +54,7 @@ class Invitation(models.Model):
 class Task(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
+        AWAITING_APPROVAL = "awaiting_approval", "Awaiting approval"
 
     household = models.ForeignKey(Household, on_delete=models.PROTECT, related_name="tasks")
     title = models.CharField(max_length=200)
@@ -65,6 +66,21 @@ class Task(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-pk"]
+
+
+class CompletionSubmission(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+
+    task = models.ForeignKey(Task, on_delete=models.PROTECT, related_name="submissions")
+    submitter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(
+            fields=["task"], condition=models.Q(status="pending"), name="one_pending_submission_per_task",
+        )]
 
 
 class TaskHistory(models.Model):
