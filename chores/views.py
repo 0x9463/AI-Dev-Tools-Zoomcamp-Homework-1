@@ -12,8 +12,8 @@ from django.views.decorators.http import require_http_methods
 
 from .decorators import product_account_required
 from .forms import HouseholdForm, InvitationForm, SignupForm, TaskForm
-from .models import Account, Household, Invitation, Task
-from .services import accept_invitation, can_submit_completion, create_household, create_task, is_administrator, send_invitation, submit_completion
+from .models import Account, CompletionSubmission, Household, Invitation, Task
+from .services import accept_invitation, approve_submission, can_submit_completion, create_household, create_task, is_administrator, send_invitation, submit_completion
 
 
 def accessible_households(user):
@@ -90,6 +90,37 @@ def task_create(request, pk):
         "household": household, "form": form,
         "has_assignees": form.fields["assigned_user"].queryset.exists(),
     })
+
+
+def administrator_household(user, pk):
+    if not is_administrator(user):
+        raise PermissionDenied
+    return get_object_or_404(Household, pk=pk, admin=user)
+
+
+@product_account_required
+@require_http_methods(["GET"])
+def pending_approvals(request, pk):
+    household = administrator_household(request.user, pk)
+    submissions = CompletionSubmission.objects.filter(
+        task__household=household, task__status=Task.Status.AWAITING_APPROVAL,
+        status=CompletionSubmission.Status.PENDING, reviewed_at__isnull=True, reviewer__isnull=True,
+    ).select_related("task", "task__assigned_user", "submitter").order_by("submitted_at", "pk")
+    return render(request, "chores/pending_approvals.html", {"household": household, "submissions": submissions})
+
+
+@product_account_required
+@require_http_methods(["POST"])
+def submission_approve(request, pk, submission_pk):
+    household = administrator_household(request.user, pk)
+    submission = get_object_or_404(CompletionSubmission, pk=submission_pk, task__household=household)
+    try:
+        approve_submission(household=household, submission_pk=submission.pk, user=request.user)
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+    else:
+        messages.success(request, "Submission approved. Task completed.")
+    return redirect("pending_approvals", pk=household.pk)
 
 
 @product_account_required

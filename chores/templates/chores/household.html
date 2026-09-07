@@ -5,6 +5,7 @@
 <p><a href="{% url 'task_list' household.pk %}">View tasks</a></p>
 {% if household.admin_id == user.pk %}
 <p>You are the administrator of this household.</p>
+<p><a href="{% url 'pending_approvals' household.pk %}">Pending approvals</a></p>
 <a class="btn btn-primary" href="{% url 'create_invitation' household.pk %}">Invite a member</a>
 {% else %}
 <p>You are a member of this household.</p>

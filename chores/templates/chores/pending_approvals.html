@@ -1,0 +1,20 @@
+{% extends "chores/base.html" %}
+{% block title %}Pending approvals · {{ household.name }}{% endblock %}
+{% block content %}
+<h1 class="h3">Pending approvals · {{ household.name }}</h1>
+<ul class="list-group mb-3">
+{% for submission in submissions %}
+<li class="list-group-item">
+  <h2 class="h5"><a href="{% url 'task_detail' household.pk submission.task.pk %}">{{ submission.task.title }}</a></h2>
+  {% if submission.task.description %}<p>{{ submission.task.description|linebreaksbr }}</p>{% endif %}
+  <p>Responsible member: {{ submission.task.assigned_user.first_name }} {{ submission.task.assigned_user.email }}</p>
+  <p>Submitted by {{ submission.submitter.first_name }} {{ submission.submitter.email }} at {{ submission.submitted_at|date:"Y-m-d H:i:s T" }}</p>
+  <form method="post" action="{% url 'submission_approve' household.pk submission.pk %}">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Approve</button>
+  </form>
+</li>
+{% empty %}<li class="list-group-item">No submissions awaiting approval.</li>{% endfor %}
+</ul>
+<a href="{% url 'household_home' household.pk %}">Back to household</a>
+{% endblock %}

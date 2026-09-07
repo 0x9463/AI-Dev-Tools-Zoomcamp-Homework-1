@@ -64,6 +64,27 @@ def can_submit_completion(task, user):
 
 
 @transaction.atomic
+def approve_submission(*, household, submission_pk, user):
+    if not user.is_active or household.admin_id != user.pk or not is_administrator(user):
+        raise PermissionDenied
+    now = timezone.now()
+    claimed = CompletionSubmission.objects.filter(
+        pk=submission_pk, task__household=household, task__status=Task.Status.AWAITING_APPROVAL,
+        status=CompletionSubmission.Status.PENDING, reviewed_at__isnull=True, reviewer__isnull=True,
+    ).update(status=CompletionSubmission.Status.APPROVED, reviewer=user, reviewed_at=now)
+    if not claimed:
+        raise ValidationError("Only unreviewed submissions for tasks Awaiting approval can be approved.")
+    submission = CompletionSubmission.objects.select_related("task").get(pk=submission_pk)
+    changed = Task.objects.filter(pk=submission.task_id, status=Task.Status.AWAITING_APPROVAL).update(
+        status=Task.Status.COMPLETED, updated_at=now,
+    )
+    if not changed:
+        raise ValidationError("This task is no longer Awaiting approval.")
+    TaskHistory.objects.create(task=submission.task, actor=user, event_type="completion_approved")
+    return submission
+
+
+@transaction.atomic
 def create_account(*, email, password, name="", role=Account.Role.MEMBER):
     email = email.strip().lower()
     validate_email(email)
